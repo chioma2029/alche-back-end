@@ -1,62 +1,21 @@
 #!/usr/bin/python3
-"""Gather an employee's TODO list progress from a REST API."""
-
-import json
-import sys
-from urllib import error, request
-
-API_URL = "https://jsonplaceholder.typicode.com"
+  """Gather data from a REST API for a given employee's TODO list progress."""
+  import requests
+  import sys
 
 
-def fetch_json(url):
-    """Fetch JSON data from the given URL."""
-    with request.urlopen(url, timeout=10) as response:
-        return json.loads(response.read().decode("utf-8"))
+  if __name__ == "__main__":
+      employee_id = sys.argv[1]
+      base_url = "https://jsonplaceholder.typicode.com/"
 
+      user = requests.get(base_url + "users/{}".format(employee_id)).json()
+      todos = requests.get(
+                  base_url + "todos", params={"userId": employee_id}).json()
 
-def get_employee(employee_id):
-    """Return the employee data for the given ID."""
-    return fetch_json(f"{API_URL}/users/{employee_id}")
+      employee_name = user.get("name")
+      done_tasks = [task for task in todos if task.get("completed")]
 
-
-def get_todo_list(employee_id):
-    """Return the todo list for the given employee ID."""
-    return fetch_json(f"{API_URL}/todos?userId={employee_id}")
-
-
-def main():
-    """Display the employee todo completion status."""
-    if len(sys.argv) != 2:
-        return 1
-
-    try:
-        employee_id = int(sys.argv[1])
-    except ValueError:
-        return 1
-
-    try:
-        employee = get_employee(employee_id)
-        todo_list = get_todo_list(employee_id)
-    except error.HTTPError:
-        return 1
-
-    total_tasks = len(todo_list)
-    done_tasks = sum(
-        1 for task in todo_list if task.get("completed") is True
-    )
-
-    print(
-        "Employee {} is done with tasks({}/{}):".format(
-            employee.get("name"), done_tasks, total_tasks
-        )
-    )
-
-    for task in todo_list:
-        if task.get("completed") is True:
-            print("\t {}".format(task.get("title")))
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+      print("Employee {} is done with tasks({}/{}):".format(
+                  employee_name, len(done_tasks), len(todos)))
+      for task in done_tasks:
+          print("\t {}".format(task.get("title")))
