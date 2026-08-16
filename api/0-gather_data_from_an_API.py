@@ -41,13 +41,19 @@ def main():
         return 1
 
     total_tasks = len(todo_list)
-    done_tasks = sum(1 for task in todo_list if task.get("completed") is True)
+    done_tasks = sum(
+        1 for task in todo_list if task.get("completed") is True
+    )
 
-    print(f"Employee {employee.get('name')} is done with tasks({done_tasks}/{total_tasks}):")
+    print(
+        "Employee {} is done with tasks({}/{}):".format(
+            employee.get("name"), done_tasks, total_tasks
+        )
+    )
 
     for task in todo_list:
         if task.get("completed") is True:
-            print(f"\t {task.get('title')}")
+            print("\t {}".format(task.get("title")))
 
     return 0
 
