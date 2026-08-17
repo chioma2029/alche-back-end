@@ -33,15 +33,4 @@ def main():
     employee_name = employee.get("name")
     done_tasks = [task for task in todos if task.get("completed")]
 
-    print("Employee {} is done with tasks({}/{}):".format(
-        employee_name, len(done_tasks), len(todos)
-    ))
-
-    for task in done_tasks:
-        print("\t {}".format(task.get("title")))
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+    print("Employ    sys.exit(main())
