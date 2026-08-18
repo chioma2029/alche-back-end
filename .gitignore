@@ -1,0 +1,14 @@
+# Generated employee export files
+[0-9]*.csv
+[0-9]*.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment files
+.env
