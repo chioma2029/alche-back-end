@@ -3,6 +3,7 @@
 
 import csv
 import json
+import os
 import sys
 from urllib import request
 
@@ -33,23 +34,29 @@ def main():
 
     username = employee.get("username")
     filename = "{}.csv".format(employee_id)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_paths = [
+        os.path.join(script_dir, filename),
+        os.path.join(os.getcwd(), filename),
+    ]
 
-    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        writer.writerow([
-            "USER_ID",
-            "USERNAME",
-            "TASK_COMPLETED_STATUS",
-            "TASK_TITLE",
-        ])
-
-        for task in todos:
+    for output_path in dict.fromkeys(output_paths):
+        with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
             writer.writerow([
-                employee_id,
-                username,
-                task.get("completed"),
-                task.get("title"),
+                "USER_ID",
+                "USERNAME",
+                "TASK_COMPLETED_STATUS",
+                "TASK_TITLE",
             ])
+
+            for task in todos:
+                writer.writerow([
+                    employee_id,
+                    username,
+                    task.get("completed"),
+                    task.get("title"),
+                ])
 
     return 0
 
