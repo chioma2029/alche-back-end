@@ -1,65 +1,43 @@
 #!/usr/bin/python3
-"""Export an employee's TODO list progress to CSV."""
-
+"""Export employee TODO list progress to CSV format."""
 import csv
-import json
-import os
+import requests
 import sys
-from urllib import request
-
-API_URL = "https://jsonplaceholder.typicode.com"
 
 
-def fetch_json(url):
-    """Fetch and decode JSON data from a URL."""
-    with request.urlopen(url, timeout=10) as response:
-        return json.loads(response.read().decode("utf-8"))
+def export_to_csv():
+    """Fetch user tasks from API and write to USER_ID.csv."""
+    if len(sys.argv) < 2:
+        return
 
+    user_id = sys.argv[1]
+    url = "https://jsonplaceholder.typicode.com"
 
-def main():
-    """Export all tasks owned by the given employee to a CSV file."""
-    if len(sys.argv) != 2:
-        return 1
+    # Fetch user data
+    user_res = requests.get(f"{url}/users/{user_id}")
+    if user_res.status_code != 200:
+        return
+    user_data = user_res.json()
+    username = user_data.get("username")
 
-    try:
-        employee_id = int(sys.argv[1])
-    except ValueError:
-        return 1
+    # Fetch todos data
+    todos_res = requests.get(f"{url}/todos", params={"userId": user_id})
+    if todos_res.status_code != 200:
+        return
+    todos_data = todos_res.json()
 
-    try:
-        employee = fetch_json("{}/users/{}".format(API_URL, employee_id))
-        todos = fetch_json("{}/todos?userId={}".format(API_URL, employee_id))
-    except Exception:
-        return 1
+    filename = f"{user_id}.csv"
 
-    username = employee.get("username")
-    filename = "{}.csv".format(employee_id)
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_paths = [
-        os.path.join(script_dir, filename),
-        os.path.join(os.getcwd(), filename),
-    ]
-
-    for output_path in dict.fromkeys(output_paths):
-        with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
-            writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+    with open(filename, mode="w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        for task in todos_data:
             writer.writerow([
-                "USER_ID",
-                "USERNAME",
-                "TASK_COMPLETED_STATUS",
-                "TASK_TITLE",
+                str(user_id),
+                username,
+                task.get("completed"),
+                task.get("title")
             ])
-
-            for task in todos:
-                writer.writerow([
-                    employee_id,
-                    username,
-                    task.get("completed"),
-                    task.get("title"),
-                ])
-
-    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    export_to_csv()
